@@ -109,12 +109,12 @@ export function PostComposer({ user }: PostComposerProps) {
   }
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <div className="flex gap-3">
-          <Avatar className="w-10 h-10">
+    <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+      <CardContent className="p-6">
+        <div className="flex gap-4">
+          <Avatar className="w-12 h-12 ring-2 ring-purple-200">
             <AvatarImage src={user?.avatar_url || "/placeholder.svg"} alt={`${user?.first_name} ${user?.last_name}`} />
-            <AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
               {user?.first_name?.[0]}
               {user?.last_name?.[0]}
             </AvatarFallback>
@@ -122,18 +122,18 @@ export function PostComposer({ user }: PostComposerProps) {
 
           <div className="flex-1">
             {postType !== "post" && (
-              <div className="mb-3 p-2 bg-purple-50 rounded-lg border border-purple-200">
+              <div className="mb-3 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200">
                 <div className="flex items-center gap-2 text-purple-700">
-                  {postType === "clip" && <Play className="w-4 h-4" />}
-                  {postType === "article" && <FileTextIcon className="w-4 h-4" />}
-                  <span className="text-sm font-medium">
+                  {postType === "clip" && <Play className="w-5 h-5" />}
+                  {postType === "article" && <FileTextIcon className="w-5 h-5" />}
+                  <span className="text-sm font-semibold">
                     {postType === "clip" ? "Creating Circle Clip" : "Writing Article"}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setPostType("post")}
-                    className="ml-auto text-purple-600 hover:text-purple-800"
+                    className="ml-auto text-purple-600 hover:text-purple-800 hover:bg-purple-100"
                   >
                     Cancel
                   </Button>
@@ -145,30 +145,29 @@ export function PostComposer({ user }: PostComposerProps) {
               placeholder={getPlaceholder()}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="min-h-[100px] border-none resize-none focus:ring-0 p-0 text-base"
-              style={{ boxShadow: "none" }}
+              className="min-h-[100px] border-2 border-gray-100 focus:border-purple-300 resize-none text-base rounded-xl"
             />
 
             {uploadedFiles.length > 0 && (
-              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
                 {uploadedFiles.map((file, index) => (
-                  <div key={index} className="relative group">
+                  <div key={index} className="relative group rounded-xl overflow-hidden">
                     {file.type.startsWith("image/") ? (
                       <img
                         src={file.url || "/placeholder.svg"}
                         alt={file.filename}
-                        className="w-full h-32 object-cover rounded-lg"
+                        className="w-full h-40 object-cover"
                       />
                     ) : (
-                      <video src={file.url} className="w-full h-32 object-cover rounded-lg" controls />
+                      <video src={file.url} className="w-full h-40 object-cover" controls />
                     )}
                     <Button
                       variant="destructive"
                       size="sm"
-                      className="absolute top-1 right-1 w-6 h-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-2 right-2 w-8 h-8 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                       onClick={() => removeFile(index)}
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </Button>
                   </div>
                 ))}
@@ -184,66 +183,54 @@ export function PostComposer({ user }: PostComposerProps) {
                 const accept = fileInputRef.current?.accept || ""
                 const fileType = accept.includes("image") ? "image" : "video"
                 handleFileUpload(e.target.files, fileType)
-                e.target.value = "" // Reset input
+                e.target.value = ""
               }}
             />
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                   onClick={() => triggerFileUpload("image/*")}
                   disabled={isUploading}
                 >
-                  {isUploading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <ImageIcon className="w-4 h-4 mr-2" />
-                  )}
-                  Photo
+                  {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImageIcon className="w-5 h-5" />}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-gray-600 hover:text-blue-600"
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg"
                   onClick={() => triggerFileUpload("video/*")}
                   disabled={isUploading}
                 >
-                  {isUploading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <VideoIcon className="w-4 h-4 mr-2" />
-                  )}
-                  Video
+                  <VideoIcon className="w-5 h-5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-gray-600 hover:text-blue-600 ${postType === "article" ? "text-blue-600 bg-blue-50" : ""}`}
+                  className={`text-gray-600 hover:text-green-600 hover:bg-green-50 rounded-lg ${postType === "article" ? "text-green-600 bg-green-50" : ""}`}
                   onClick={() => setPostType(postType === "article" ? "post" : "article")}
                 >
-                  <FileTextIcon className="w-4 h-4 mr-2" />
-                  Article
+                  <FileTextIcon className="w-5 h-5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-gray-600 hover:text-purple-600 ${postType === "clip" ? "text-purple-600 bg-purple-50" : ""}`}
+                  className={`text-gray-600 hover:text-pink-600 hover:bg-pink-50 rounded-lg ${postType === "clip" ? "text-pink-600 bg-pink-50" : ""}`}
                   onClick={() => setPostType(postType === "clip" ? "post" : "clip")}
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  Clip
+                  <Play className="w-5 h-5" />
                 </Button>
               </div>
 
               <Button
                 onClick={handlePost}
                 disabled={(!content.trim() && uploadedFiles.length === 0) || isPosting || isUploading}
-                size="sm"
+                className="gradient-purple text-white font-semibold rounded-full px-6 hover:opacity-90 shadow-lg"
               >
-                <SendIcon className="w-4 h-4 mr-2" />
+                {isPosting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <SendIcon className="w-4 h-4 mr-2" />}
                 {isPosting ? "Posting..." : "Post"}
               </Button>
             </div>

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import { CommentsSection } from "./comments-section"
+import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react"
 
 interface PostCardProps {
   post: {
@@ -75,18 +76,17 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
 
   return (
     <>
-      <Card>
+      <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
         <CardContent className="p-6">
-          {/* Post header */}
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
               <Link href={`/profile/${post.author.id}`}>
-                <Avatar className="w-12 h-12">
+                <Avatar className="w-12 h-12 ring-2 ring-purple-200 hover:ring-purple-400 transition-all">
                   <AvatarImage
                     src={post.author.avatar_url || "/placeholder.svg"}
                     alt={`${post.author.first_name} ${post.author.last_name}`}
                   />
-                  <AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
                     {post.author.first_name[0]}
                     {post.author.last_name[0]}
                   </AvatarFallback>
@@ -97,42 +97,44 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
                 <div className="flex items-center gap-2">
                   <Link
                     href={`/profile/${post.author.id}`}
-                    className="font-semibold text-gray-900 hover:text-purple-600"
+                    className="font-bold text-gray-900 hover:text-purple-600 transition-colors"
                   >
                     {post.author.first_name} {post.author.last_name}
                   </Link>
                   {post.author.is_verified && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs px-2">
                       ✓ Verified
                     </Badge>
                   )}
                 </div>
-                {post.author.headline && <p className="text-sm text-gray-600">{post.author.headline}</p>}
-                <p className="text-xs text-gray-500">{timeAgo}</p>
+                {post.author.headline && <p className="text-sm text-gray-600 line-clamp-1">{post.author.headline}</p>}
+                <p className="text-xs text-gray-500 mt-0.5">{timeAgo}</p>
               </div>
             </div>
 
-            <Button variant="ghost" size="sm">
-              <span className="text-lg">⋯</span>
+            <Button variant="ghost" size="sm" className="hover:bg-gray-100 rounded-full">
+              <MoreHorizontal className="w-5 h-5 text-gray-500" />
             </Button>
           </div>
 
           {/* Post content */}
           <div className="mb-4">
-            <p className="text-gray-900 whitespace-pre-wrap">{post.content}</p>
+            <p className="text-gray-900 whitespace-pre-wrap text-base leading-relaxed">{post.content}</p>
           </div>
 
-          {/* Engagement stats */}
           {(likesCount > 0 || post.comments_count > 0) && (
-            <div className="flex items-center justify-between py-2 mb-2 border-b border-gray-100">
-              <div className="flex items-center gap-4 text-sm text-gray-600">
+            <div className="flex items-center justify-between py-3 mb-3 border-y border-gray-100">
+              <div className="flex items-center gap-4 text-sm">
                 {likesCount > 0 && (
-                  <span>
-                    {likesCount} {likesCount === 1 ? "like" : "likes"}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 flex items-center justify-center">
+                      <Heart className="w-3.5 h-3.5 text-white fill-white" />
+                    </div>
+                    <span className="font-semibold text-gray-700">{likesCount}</span>
+                  </div>
                 )}
                 {post.comments_count > 0 && (
-                  <span>
+                  <span className="text-gray-600 hover:text-purple-600 cursor-pointer transition-colors">
                     {post.comments_count} {post.comments_count === 1 ? "comment" : "comments"}
                   </span>
                 )}
@@ -140,31 +142,38 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLike}
               disabled={isLiking}
-              className={`flex items-center gap-2 ${isLiked ? "text-red-600 hover:text-red-700" : "text-gray-600 hover:text-red-600"}`}
+              className={`flex-1 rounded-xl font-semibold transition-all ${
+                isLiked
+                  ? "text-pink-600 bg-pink-50 hover:bg-pink-100"
+                  : "text-gray-600 hover:text-pink-600 hover:bg-pink-50"
+              }`}
             >
-              <span className={`text-lg ${isLiked ? "text-red-600" : ""}`}>{isLiked ? "❤️" : "🤍"}</span>
-              Like
+              <Heart className={`w-5 h-5 mr-2 ${isLiked ? "fill-pink-600" : ""}`} />
+              {isLiked ? "Liked" : "Like"}
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 text-gray-600 hover:text-purple-600"
+              className="flex-1 rounded-xl font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all"
               onClick={() => setShowComments(true)}
             >
-              <span className="text-lg">💬</span>
+              <MessageCircle className="w-5 h-5 mr-2" />
               Comment
             </Button>
 
-            <Button variant="ghost" size="sm" className="flex items-center gap-2 text-gray-600 hover:text-green-600">
-              <span className="text-lg">📤</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="flex-1 rounded-xl font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
+            >
+              <Share2 className="w-5 h-5 mr-2" />
               Share
             </Button>
           </div>
