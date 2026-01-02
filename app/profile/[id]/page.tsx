@@ -125,7 +125,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             {tab === "skills" && <ProfileSkills skills={skills || []} canEdit={currentUser.id === id} />}
             {tab === "posts" && (
               <ProfilePosts
-                posts={postsWithInteractions}
+                userId={id}
+                initialPosts={postsWithInteractions}
                 user={profileUser}
                 currentUserId={currentUser.id}
                 isOwnProfile={currentUser.id === id}

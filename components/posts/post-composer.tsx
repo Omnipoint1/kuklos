@@ -89,7 +89,6 @@ export function PostComposer({ user }: PostComposerProps) {
       setContent("")
       setPostType("post")
       setUploadedFiles([])
-      router.refresh()
     } catch (error) {
       console.error("Error creating post:", error)
     } finally {
