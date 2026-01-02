@@ -78,19 +78,34 @@ export function PostComposer({ user }: PostComposerProps) {
 
     setIsPosting(true)
     try {
-      const { error } = await supabase.from("posts").insert({
-        author_id: user.id,
-        content: content.trim(),
-        media_urls: uploadedFiles.length > 0 ? uploadedFiles.map((f) => f.url) : null,
-      })
+      console.log("[v0] Creating post with content:", content)
+      console.log("[v0] User ID:", user.id)
+      console.log("[v0] Media files:", uploadedFiles)
 
-      if (error) throw error
+      const { data, error } = await supabase
+        .from("posts")
+        .insert({
+          author_id: user.id,
+          content: content.trim(),
+          media_urls: uploadedFiles.length > 0 ? uploadedFiles.map((f) => f.url) : null,
+        })
+        .select()
+
+      if (error) {
+        console.error("[v0] Post creation error:", error)
+        throw error
+      }
+
+      console.log("[v0] Post created successfully:", data)
 
       setContent("")
       setPostType("post")
       setUploadedFiles([])
+
+      router.refresh()
     } catch (error) {
-      console.error("Error creating post:", error)
+      console.error("[v0] Error creating post:", error)
+      alert("Failed to create post. Please try again.")
     } finally {
       setIsPosting(false)
     }

@@ -15,6 +15,8 @@ export default async function FeedPage() {
     redirect("/auth/login")
   }
 
+  console.log("[v0] Feed: Loading for user:", user.id)
+
   // Get user profile
   const { data: userProfile } = await supabase.from("users").select("*").eq("id", user.id).single()
 
@@ -24,8 +26,7 @@ export default async function FeedPage() {
     .neq("id", user.id)
     .limit(5)
 
-  // Get posts for feed (for now, get all posts - we'll improve the algorithm later)
-  const { data: posts } = await supabase
+  const { data: posts, error: postsError } = await supabase
     .from("posts")
     .select(`
       *,
@@ -40,6 +41,11 @@ export default async function FeedPage() {
     `)
     .order("created_at", { ascending: false })
     .limit(20)
+
+  console.log("[v0] Feed: Fetched posts count:", posts?.length || 0)
+  if (postsError) {
+    console.error("[v0] Feed: Error fetching posts:", postsError)
+  }
 
   // Get like counts and user's likes
   const postIds = posts?.map((post) => post.id) || []
