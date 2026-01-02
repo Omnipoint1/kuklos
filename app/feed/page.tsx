@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { FeedLayout } from "@/components/feed/feed-layout"
 import { PostComposer } from "@/components/posts/post-composer"
-import { PostCard } from "@/components/posts/post-card"
+import { FeedPosts } from "@/components/feed/feed-posts"
 
 export default async function FeedPage() {
   const supabase = await createClient()
@@ -73,17 +73,7 @@ export default async function FeedPage() {
     <FeedLayout user={userProfile} suggestedPeople={suggestedPeople || []}>
       <div className="max-w-2xl mx-auto space-y-6">
         <PostComposer user={userProfile} />
-
-        <div className="space-y-4">
-          {postsWithInteractions.length > 0 ? (
-            postsWithInteractions.map((post) => <PostCard key={post.id} post={post} currentUserId={user.id} />)
-          ) : (
-            <div className="text-center py-12">
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Welcome to Circle!</h3>
-              <p className="text-gray-600 mb-4">Start by creating your first post or connecting with professionals.</p>
-            </div>
-          )}
-        </div>
+        <FeedPosts initialPosts={postsWithInteractions} currentUserId={user.id} />
       </div>
     </FeedLayout>
   )

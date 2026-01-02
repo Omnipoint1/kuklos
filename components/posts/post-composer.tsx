@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,7 +26,6 @@ export function PostComposer({ user }: PostComposerProps) {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const router = useRouter()
   const supabase = createClient()
 
   const handleFileUpload = async (files: FileList | null, fileType: "image" | "video") => {
@@ -101,8 +99,6 @@ export function PostComposer({ user }: PostComposerProps) {
       setContent("")
       setPostType("post")
       setUploadedFiles([])
-
-      router.refresh()
     } catch (error) {
       console.error("[v0] Error creating post:", error)
       alert("Failed to create post. Please try again.")
