@@ -37,6 +37,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likes_count)
   const [isLiking, setIsLiking] = useState(false)
   const [showComments, setShowComments] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -82,13 +83,16 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             <div className="flex items-center gap-3">
               <Link href={`/profile/${post.author.id}`}>
                 <Avatar className="w-12 h-12 ring-2 ring-purple-200 hover:ring-purple-400 transition-all">
-                  <AvatarImage
-                    src={post.author.avatar_url || "/placeholder.svg"}
-                    alt={`${post.author.first_name} ${post.author.last_name}`}
-                  />
+                  {!avatarError && post.author.avatar_url ? (
+                    <AvatarImage
+                      src={post.author.avatar_url || "/placeholder.svg"}
+                      alt={`${post.author.first_name} ${post.author.last_name}`}
+                      onError={() => setAvatarError(true)}
+                    />
+                  ) : null}
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
-                    {post.author.first_name[0]}
-                    {post.author.last_name[0]}
+                    {post.author.first_name?.[0] || ""}
+                    {post.author.last_name?.[0] || ""}
                   </AvatarFallback>
                 </Avatar>
               </Link>
@@ -101,7 +105,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
                   >
                     {post.author.first_name} {post.author.last_name}
                   </Link>
-                  {post.author.is_verified && (
+                  {post.author.is_verified === true && (
                     <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 text-xs px-2">
                       ✓ Verified
                     </Badge>
