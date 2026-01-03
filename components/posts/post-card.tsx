@@ -10,7 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import { CommentsSection } from "./comments-section"
-import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react"
+import { PostOptionsMenu } from "./post-options-menu"
+import { ShareDialog } from "./share-dialog"
+import { Heart, MessageCircle, Share2 } from "lucide-react"
 import Image from "next/image"
 
 interface PostCardProps {
@@ -39,6 +41,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [likesCount, setLikesCount] = useState(post.likes_count)
   const [isLiking, setIsLiking] = useState(false)
   const [showComments, setShowComments] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
@@ -121,9 +124,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
               </div>
             </div>
 
-            <Button variant="ghost" size="sm" className="hover:bg-gray-100 rounded-full">
-              <MoreHorizontal className="w-5 h-5 text-gray-500" />
-            </Button>
+            <PostOptionsMenu postId={post.id} authorId={post.author.id} currentUserId={currentUserId} />
           </div>
 
           <div className="mb-4">
@@ -203,6 +204,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
               variant="ghost"
               size="sm"
               className="flex-1 rounded-xl font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-all"
+              onClick={() => setShowShareDialog(true)}
             >
               <Share2 className="w-5 h-5 mr-2" />
               Share
@@ -216,6 +218,14 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
         currentUserId={currentUserId}
         isOpen={showComments}
         onClose={() => setShowComments(false)}
+      />
+
+      <ShareDialog
+        postId={post.id}
+        postContent={post.content}
+        authorName={`${post.author.first_name} ${post.author.last_name}`}
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
       />
     </>
   )
