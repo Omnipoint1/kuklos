@@ -19,7 +19,7 @@ export function FeedPosts({ initialPosts, currentUserId }: FeedPostsProps) {
     console.log("[v0] FeedPosts: Fetching posts...")
     setLoading(true)
 
-    const { data: posts, error } = await supabase
+    const { data: postsData, error } = await supabase
       .from("posts")
       .select(`
         *,
@@ -30,7 +30,8 @@ export function FeedPosts({ initialPosts, currentUserId }: FeedPostsProps) {
           headline,
           avatar_url,
           is_verified
-        )
+        ),
+        media_urls
       `)
       .order("created_at", { ascending: false })
       .limit(20)
@@ -41,17 +42,18 @@ export function FeedPosts({ initialPosts, currentUserId }: FeedPostsProps) {
       return
     }
 
-    console.log("[v0] FeedPosts: Fetched", posts?.length || 0, "posts")
+    console.log("[v0] FeedPosts: Fetched", postsData?.length || 0, "posts")
+    console.log("[v0] FeedPosts: First post data:", postsData?.[0])
 
     // Get like counts and user's likes
-    const postIds = posts?.map((post) => post.id) || []
+    const postIds = postsData?.map((post) => post.id) || []
     const { data: likes } = await supabase.from("post_likes").select("post_id, user_id").in("post_id", postIds)
 
     // Get comment counts
     const { data: comments } = await supabase.from("comments").select("post_id").in("post_id", postIds)
 
     const postsWithInteractions =
-      posts?.map((post) => {
+      postsData?.map((post) => {
         const postLikes = likes?.filter((like) => like.post_id === post.id) || []
         const postComments = comments?.filter((comment) => comment.post_id === post.id) || []
         const userHasLiked = postLikes.some((like) => like.user_id === currentUserId)

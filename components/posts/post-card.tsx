@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { formatDistanceToNow } from "date-fns"
 import { CommentsSection } from "./comments-section"
 import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react"
+import Image from "next/image"
 
 interface PostCardProps {
   post: {
@@ -20,6 +21,7 @@ interface PostCardProps {
     likes_count: number
     comments_count: number
     user_has_liked: boolean
+    media_urls?: string[]
     author: {
       id: string
       first_name: string
@@ -38,8 +40,13 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
   const [isLiking, setIsLiking] = useState(false)
   const [showComments, setShowComments] = useState(false)
   const [avatarError, setAvatarError] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleLike = async () => {
     if (isLiking) return
@@ -47,7 +54,6 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     setIsLiking(true)
     try {
       if (isLiked) {
-        // Unlike
         const { error } = await supabase.from("post_likes").delete().eq("post_id", post.id).eq("user_id", currentUserId)
 
         if (!error) {
@@ -55,7 +61,6 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
           setLikesCount((prev) => prev - 1)
         }
       } else {
-        // Like
         const { error } = await supabase.from("post_likes").insert({
           post_id: post.id,
           user_id: currentUserId,
@@ -73,7 +78,7 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
     }
   }
 
-  const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true })
+  const timeAgo = mounted ? formatDistanceToNow(new Date(post.created_at), { addSuffix: true }) : ""
 
   return (
     <>
@@ -121,9 +126,31 @@ export function PostCard({ post, currentUserId }: PostCardProps) {
             </Button>
           </div>
 
-          {/* Post content */}
           <div className="mb-4">
-            <p className="text-gray-900 whitespace-pre-wrap text-base leading-relaxed">{post.content}</p>
+            {post.content && (
+              <p className="text-gray-900 whitespace-pre-wrap text-base leading-relaxed mb-3">{post.content}</p>
+            )}
+
+            {post.media_urls && post.media_urls.length > 0 && (
+              <div className="grid grid-cols-1 gap-2 rounded-xl overflow-hidden">
+                {post.media_urls.map((url, index) => {
+                  const isVideo = url.match(/\.(mp4|webm|ogg)$/i)
+                  return isVideo ? (
+                    <video key={index} src={url} controls className="w-full rounded-lg" />
+                  ) : (
+                    <div key={index} className="relative w-full aspect-video bg-gray-100">
+                      <Image
+                        src={url || "/placeholder.svg"}
+                        alt="Post media"
+                        fill
+                        className="object-cover rounded-lg"
+                        sizes="(max-width: 768px) 100vw, 600px"
+                      />
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {(likesCount > 0 || post.comments_count > 0) && (
