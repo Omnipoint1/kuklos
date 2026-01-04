@@ -34,15 +34,11 @@ interface PostOptionsMenuProps {
 export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: PostOptionsMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [open, setOpen] = useState(false)
   const router = useRouter()
   const supabase = createClient()
   const isOwner = authorId === currentUserId
 
-  console.log("[v0] PostOptionsMenu - postId:", postId, "isOwner:", isOwner)
-
   const handleDelete = async () => {
-    console.log("[v0] Deleting post:", postId)
     setIsDeleting(true)
     try {
       const { error } = await supabase.from("posts").delete().eq("id", postId).eq("author_id", currentUserId)
@@ -78,25 +74,11 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
     })
   }
 
-  const handleDeleteClick = () => {
-    console.log("[v0] Opening delete dialog")
-    setOpen(false)
-    setShowDeleteDialog(true)
-  }
-
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hover:bg-gray-100 rounded-full h-8 w-8 p-0"
-            onClick={() => {
-              console.log("[v0] Three dots clicked")
-              setOpen(!open)
-            }}
-          >
+          <Button variant="ghost" size="sm" className="hover:bg-gray-100 rounded-full h-8 w-8 p-0">
             <MoreHorizontal className="w-5 h-5 text-gray-500" />
           </Button>
         </DropdownMenuTrigger>
@@ -105,15 +87,16 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
             <>
               <DropdownMenuItem
                 onClick={() => {
-                  console.log("[v0] Edit clicked")
-                  setOpen(false)
                   router.push(`/post/${postId}/edit`)
                 }}
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit post
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDeleteClick} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+              <DropdownMenuItem
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete post
               </DropdownMenuItem>
@@ -123,8 +106,6 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
             <>
               <DropdownMenuItem
                 onClick={() => {
-                  console.log("[v0] Save post clicked")
-                  setOpen(false)
                   toast({
                     title: "Post saved",
                     description: "Post has been saved to your collection.",
@@ -136,8 +117,6 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => {
-                  console.log("[v0] Report post clicked")
-                  setOpen(false)
                   toast({
                     title: "Report submitted",
                     description: "Thank you for helping keep Circle safe.",
@@ -151,13 +130,7 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
               <DropdownMenuSeparator />
             </>
           )}
-          <DropdownMenuItem
-            onClick={() => {
-              console.log("[v0] Copy link clicked")
-              setOpen(false)
-              handleCopyLink()
-            }}
-          >
+          <DropdownMenuItem onClick={handleCopyLink}>
             <LinkIcon className="w-4 h-4 mr-2" />
             Copy link
           </DropdownMenuItem>
