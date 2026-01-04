@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
@@ -31,27 +33,45 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
   const supabase = createClient()
   const isOwner = authorId === currentUserId
 
-  console.log("[v0] PostOptionsMenu - isOwner:", isOwner, "authorId:", authorId, "currentUserId:", currentUserId)
+  console.log("[v0] PostOptionsMenu rendered - postId:", postId, "isOwner:", isOwner)
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log("[v0] Delete button clicked for post:", postId)
+    setShowDeleteDialog(true)
+  }
 
   const handleDelete = async () => {
-    console.log("[v0] Starting delete for post:", postId)
+    console.log("[v0] Confirming delete for post:", postId)
     setIsDeleting(true)
+
     try {
+      console.log("[v0] Attempting to delete from database...")
       const { error } = await supabase.from("posts").delete().eq("id", postId).eq("author_id", currentUserId)
 
       if (error) {
-        console.error("[v0] Delete error:", error)
+        console.error("[v0] Database delete error:", error)
         throw error
       }
 
-      console.log("[v0] Post deleted successfully")
+      console.log("[v0] Post deleted successfully from database")
+
       toast({
         title: "Post deleted",
         description: "Your post has been successfully deleted.",
       })
 
       setShowDeleteDialog(false)
-      onDelete?.()
+
+      // Call onDelete callback if provided
+      if (onDelete) {
+        console.log("[v0] Calling onDelete callback")
+        onDelete()
+      }
+
+      // Refresh the page to update the UI
+      console.log("[v0] Refreshing router")
       router.refresh()
     } catch (error) {
       console.error("[v0] Error deleting post:", error)
@@ -65,16 +85,8 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
     }
   }
 
-  const handleCopyLink = () => {
-    const postUrl = `${window.location.origin}/post/${postId}`
-    navigator.clipboard.writeText(postUrl)
-    toast({
-      title: "Link copied",
-      description: "Post link copied to clipboard.",
-    })
-  }
-
   if (!isOwner) {
+    console.log("[v0] Not showing delete button - user is not owner")
     return null
   }
 
@@ -83,18 +95,16 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => {
-          console.log("[v0] Delete button clicked")
-          setShowDeleteDialog(true)
-        }}
-        className="hover:bg-red-50 hover:text-red-600 rounded-full h-8 w-8 p-0 transition-colors"
+        onClick={handleDeleteClick}
+        className="hover:bg-red-50 hover:text-red-600 rounded-full h-9 w-9 p-0 transition-colors"
         title="Delete post"
+        type="button"
       >
         <Trash2 className="w-4 h-4" />
       </Button>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete post?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -102,7 +112,15 @@ export function PostOptionsMenu({ postId, authorId, currentUserId, onDelete }: P
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              disabled={isDeleting}
+              onClick={() => {
+                console.log("[v0] Delete cancelled")
+                setShowDeleteDialog(false)
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
